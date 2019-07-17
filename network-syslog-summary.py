@@ -1,20 +1,55 @@
 '''
- Script to summarise Cisco syslog
+ Script to summarise Cisco syslog and graph count over last retention period
+ Output as follows:
+
+switch.log-2019-07-17.gz's line count is 260459
+
+Count of loglines per day over last 7 days is:
+{'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195, '16-Jul': 291950, '17-Jul': 260459}
+
+Top 20 talkers are: (this bit is obfruscated)
+('device_1 %MSG_A:', COUNT)
+('device_2 %MSG_B:', COUNT)
+etc
+
  Guy Morrell 2019-06
 '''
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import gzip
+import datetime
+import json
+from datetime import date, timedelta
 
+retention = 7
 message_count = {}
 line_count = 0
-history = []
-history_output = ""
-# Need to change this to open today's log from the syslog server
-if os.path.exists("switch.log"):
-    log = open("switch.log")
-else:
-    print("No logfile found")
+now = datetime.datetime.now()
+today_ymd = "switch.log-"+now.strftime("%Y")+"-"+now.strftime("%m")+"-"+now.strftime("%d")+".gz"# YYYY-MM-DD
+with open("server.json", "rt") as server_f:
+    credentials = json.load(server_f)
+USERNAME = credentials["USERNAME"]
+SERVER = credentials["SERVER"]
+PATH = credentials["PATH"]
+ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
+update_hist = 'false'
+today_d = date.today()
+today_s = today_d.strftime("%d-%b")
+oldest_d = today_d - timedelta(days = retention)
+oldest_s = oldest_d.strftime("%d-%b")
+'''
+Open today's log from the syslog server
+Name format for yesterday's log is switch.log-YYYY-MM-DD.gz, where DD = today, as the rotation happens at 06:00
+'''
+if not os.path.exists(today_ymd):
+    print("Copying file")
+    os.system(ARG) # copy yesterday's file to the local folder
+    update_hist = 'true'
+# This fails 'list index out of range', need to fix so file gets closed
+with gzip.open(today_ymd, mode='rt') as f:
+    log = f.readlines()
+# Count unique messaage_id / name combined messages and store in message_count dict
 for line in log:
     line_count += 1
     # Grab the unique message id, e.g. %DOT1X-5-FAIL:
@@ -23,49 +58,53 @@ for line in log:
     device_id = line.strip().split()[3]
     # Combine for easy counting
     device_message = device_id + " " + message_id
-    # Count the combined messages and store in dict
     if device_message not in message_count:
         message_count[device_message] = 1
     else:
         count = message_count[device_message]
         count += 1
         message_count[device_message] = count
-# Baseline count - need to store this in a file for future plotting
-# List of last 7 days' counts [1,2,3,4,5,5,7]
-if os.path.exists("history.txt"):
-    with open("history.txt", "rt") as history_f:
-        history_str = history_f.read()
-        history = history_str.split(",")
-#    os.remove("history.txt")
+print(today_ymd+"'s line count is "+str(line_count))
+# Read the old history file
+if os.path.exists("history.json"):
+    with open("history.json", "rt") as history_f:
+         history = json.load(history_f)
+    print("Count of loglines per day over last "+str(retention)+" days is:")
     print(history)
 else:
     print("No history file found.")
-# pop oldest entry, push newest on
-(history.pop())
-# add today's count to the start
-history.insert(0, line_count)
-# Re-write history
-index = len(history) - 1
-count = 0
-with open("history_new.txt", "w") as history_f:
-    for the_int in history:
-        count += 1
-        # print(the_int, file=history_f)
-        history_output = history_output + str(the_int)
-        if count <= index:
-            history_output = history_output + ", "
-    print(history_output, file=history_f)
+if update_hist == 'true':  # if script run multiple times in 24hr period, don't overwrite history data
+    print("Updating history data")
+    # get rid of the oldest entry if exists
+    if oldest_s in history:
+        (history.pop(oldest_s))
+    else:
+        print("No data for "+oldest_s+" in history")
+    # add today's count
+    history[today_s] = line_count
+    # Re-write history
+    with open('history.json', 'w') as outfile:
+        json.dump(history, outfile)
+
 # Plot a graph of the last 7 days' data
-x_axis = [-6, -5, -4, -3, -2, -1, 0]
+pos = 0
+x_axis = []
+y_axis = []
+for date in history:
+    x_axis.insert(pos, date)
+    y_axis.insert(pos, history[date])
+    pos += 1
 plt.xlabel('Date')
 plt.ylabel('Log Count')
-np_history = np.array(history, dtype=np.int64)
+np_history = np.array(y_axis, dtype=np.int64)
 plt.title('Syslog Message Count over time')
 plt.plot(x_axis, np_history)
 plt.show()
+
 # Print the top 20 messages by device
 sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
 count = 20
+print("Top "+str(count)+" talkers are: ")
 for i in sorted_mc:
     if count > 0:
         print(i)
