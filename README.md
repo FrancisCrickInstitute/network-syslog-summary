@@ -10,9 +10,15 @@ The script is to aid daily operational checks in a busy noc.
 Output as follows (graph not shown):
 
 switch.log-2019-07-17.gz's line count is 260459
+
 Count of loglines per day over last 7 days is:
+
 {'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195, '16-Jul': 291950, '17-Jul': 260459}
+
 Top 20 talkers are: (this bit is obfruscated)
+
 ('device_1 %MSG_A:', COUNT)
+
 ('device_2 %MSG_B:', COUNT)
+
 etc
