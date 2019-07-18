@@ -92,7 +92,7 @@ if update_hist == 'true':  # if script run multiple times in 24hr period, don't 
     with open('history.json', 'w') as outfile:
         json.dump(history, outfile)
 
-# Plot a graph of the last 7 days' data
+# Plot a graph of the last retention days' data
 pos = 0
 x_axis = []
 y_axis = []
