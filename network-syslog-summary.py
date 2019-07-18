@@ -19,8 +19,8 @@ import fnmatch
 import matplotlib.pyplot as plt
 import numpy as np
 import gzip
-import datetime
 import json
+import datetime
 from datetime import date, timedelta
 
 retention = 7
@@ -28,7 +28,6 @@ message_count = {}
 line_count = 0
 now = datetime.datetime.now()
 today_ymd = "switch.log-"+now.strftime("%Y")+"-"+now.strftime("%m")+"-"+now.strftime("%d")+".gz"# YYYY-MM-DD
-#today_renamed = today_ymd + "-processed"
 with open("server.json", "rt") as server_f:
     credentials = json.load(server_f)
 USERNAME = credentials["USERNAME"]
