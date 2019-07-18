@@ -15,6 +15,7 @@ etc
  Guy Morrell 2019-06
 '''
 import os
+import fnmatch
 import matplotlib.pyplot as plt
 import numpy as np
 import gzip
@@ -27,6 +28,7 @@ message_count = {}
 line_count = 0
 now = datetime.datetime.now()
 today_ymd = "switch.log-"+now.strftime("%Y")+"-"+now.strftime("%m")+"-"+now.strftime("%d")+".gz"# YYYY-MM-DD
+#today_renamed = today_ymd + "-processed"
 with open("server.json", "rt") as server_f:
     credentials = json.load(server_f)
 USERNAME = credentials["USERNAME"]
@@ -39,16 +41,21 @@ today_s = today_d.strftime("%d-%b")
 oldest_d = today_d - timedelta(days = retention)
 oldest_s = oldest_d.strftime("%d-%b")
 '''
-Open today's log from the syslog server
+Copy today's log from the syslog server
 Name format for yesterday's log is switch.log-YYYY-MM-DD.gz, where DD = today, as the rotation happens at 06:00
+Need to cope with the script running multiple times in one day and should delete old logfiles
 '''
 if not os.path.exists(today_ymd):
     print("Copying file")
     os.system(ARG) # copy yesterday's file to the local folder
     update_hist = 'true'
-# This fails 'list index out of range', need to fix so file gets closed
 with gzip.open(today_ymd, mode='rt') as f:
     log = f.readlines()
+# delete any filenames starting switch.log except today's
+for filename in os.listdir():
+    if fnmatch.fnmatch(filename, 'switch.log*'):
+        if not fnmatch.fnmatch(filename, today_ymd):
+            os.remove(filename)
 # Count unique messaage_id / name combined messages and store in message_count dict
 for line in log:
     line_count += 1
