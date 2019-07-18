@@ -4,5 +4,15 @@ The script is to aid daily operational checks in a busy noc.
 1. We aggregate all our switch logs into a single switch.log file
 2. network-syslog-summary takes the message-id and the name or IP of the device from each line and counts the total unique entries. 
 3. These are sorted in reverse order for quick reference. 
-4. history.txt contains syslog ine counts from the last n days
-5. The oldest entry is removed, today's is added and the result is graphed.
+4. today's date and count are written to history.json
+5. The entry from n days ago is removed and the result is graphed.
+
+Output as follows (graph not shown):
+
+switch.log-2019-07-17.gz's line count is 260459
+Count of loglines per day over last 7 days is:
+{'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195, '16-Jul': 291950, '17-Jul': 260459}
+Top 20 talkers are: (this bit is obfruscated)
+('device_1 %MSG_A:', COUNT)
+('device_2 %MSG_B:', COUNT)
+etc
