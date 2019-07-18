@@ -1,0 +1,5 @@
+{
+	"USERNAME":"user",
+	"SERVER":"host.domain.com",
+	"PATH":":/var/log/syslog/"
+}
