@@ -6,7 +6,7 @@ The script is to aid daily operational checks in a busy NOC.
 3. These are sorted in reverse order for quick reference. 
 4. A graph is produced showing the previous N days' data for trend analysis 
 
-Output as follows (graph not shown):
+Output as follows (graph not shown but example is available in this repo):
 
 switch.log-2019-07-17.gz's line count is 260459
 
