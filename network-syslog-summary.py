@@ -84,7 +84,7 @@ for date in history.keys():
     date_list.append(date)
 date_list.sort() # be sure oldest is in element 0
 oldest_s = str(date_list[0])
-# only overwrite if it hasn't yet happened today and
+# only overwrite if we don't yet have an entry for today
 if today_s not in history:
     print("Updating history data")
     # get rid of the oldest entry if exists and we have at least retention entries
