@@ -34,11 +34,10 @@ USERNAME = credentials["USERNAME"]
 SERVER = credentials["SERVER"]
 PATH = credentials["PATH"]
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
-update_hist = 'false'
 today_d = date.today()
-today_s = today_d.strftime("%d-%b")
-oldest_d = today_d - timedelta(days = retention)
-oldest_s = oldest_d.strftime("%d-%b")
+today_s = today_d.strftime("%Y-%m-%d")
+oldest_d = today_d - timedelta(days = retention) # logic flaw, if script not run every day, old data persists
+oldest_s = oldest_d.strftime("%Y-%m-%d")
 '''
 Copy today's log from the syslog server
 Name format for yesterday's log is switch.log-YYYY-MM-DD.gz, where DD = today, as the rotation happens at 06:00
@@ -79,13 +78,26 @@ if os.path.exists("history.json"):
     print(history)
 else:
     print("No history file found.")
-if update_hist == 'true':  # if script run multiple times in 24hr period, don't overwrite history data
+# find oldest date and update variable
+date_list = []
+for date in history.keys():
+    date_list.append(date)
+date_list.sort() # be sure oldest is in element 0
+oldest_s = str(date_list[0])
+# only overwrite if it hasn't yet happened today and
+if today_s not in history:
     print("Updating history data")
-    # get rid of the oldest entry if exists
-    if oldest_s in history:
+    # get rid of the oldest entry if exists and we have at least retention entries
+    size = len(history)
+    if oldest_s in history and size >= retention:
+        print("Removing oldest entry, ", oldest_s)
         (history.pop(oldest_s))
     else:
-        print("No data for "+oldest_s+" in history")
+        print("No deletion today: ")
+        if size < retention:
+            print("     Only "+str(size)+" entries out of "+str(retention)+" entries stored in history")
+        else:
+            print("    "+oldest_s+" not in history")
     # add today's count
     history[today_s] = line_count
     # Re-write history
@@ -104,14 +116,24 @@ plt.xlabel('Date')
 plt.ylabel('Log Count')
 np_history = np.array(y_axis, dtype=np.int64)
 plt.title('Syslog Message Count over time')
+plt.xticks(rotation=30)
 plt.plot(x_axis, np_history)
 plt.show()
 
 # Print the top 20 messages by device
 sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
 count = 20
+data = {}
+data['text'] = ["Here are the top talkers:"]
+data['Top Talkers'] = []
 print("Top "+str(count)+" talkers are: ")
 for i in sorted_mc:
     if count > 0:
+        num = 21 - count
         print(i)
+        data['Top Talkers'].append({
+            num : i,
+        })
     count -= 1
+with open('message.json', 'wt') as message_f:
+    json.dump(data, message_f, indent=4)
