@@ -1,10 +1,11 @@
 # network-syslog-summary
 Summarise syslog-ng format Cisco logs and graph count. Work in progress.
 The script is to aid daily operational checks in a busy NOC.
+Rename server_example.json to server.json locally and add your details. 
 1. We aggregate all our switch logs into a single switch.log file
 2. network-syslog-summary takes the message-id and the name or IP of the device from each line and counts the total unique entries. 
-3. These are sorted in reverse order for quick reference. 
-4. A graph is produced showing the previous N days' data for trend analysis 
+3. These are sorted in reverse order for quick reference and posted to our slack channel
+4. A graph is produced showing the previous N days' data for trend analysis. I'm working on posting this to slack too.
 
 Output as follows (graph not shown but example is available in this repo):
 
