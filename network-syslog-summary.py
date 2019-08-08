@@ -21,9 +21,11 @@ import numpy as np
 import gzip
 import json
 import datetime
+import requests
+import slack
 from datetime import date, timedelta
 
-retention = 7
+retention = 30
 message_count = {}
 line_count = 0
 now = datetime.datetime.now()
@@ -33,10 +35,13 @@ with open("server.json", "rt") as server_f:
 USERNAME = credentials["USERNAME"]
 SERVER = credentials["SERVER"]
 PATH = credentials["PATH"]
+WEBHOOK_URL = credentials["WEBHOOK_PROD"]
+OATH = credentials["OATH_TOKEN_DEV"]
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
+DEBUG = 0 # set to 1 for extra output
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
-oldest_d = today_d - timedelta(days = retention) # logic flaw, if script not run every day, old data persists
+oldest_d = today_d - timedelta(days = retention)
 oldest_s = oldest_d.strftime("%Y-%m-%d")
 '''
 Copy today's log from the syslog server
@@ -69,13 +74,15 @@ for line in log:
         count = message_count[device_message]
         count += 1
         message_count[device_message] = count
-print(today_ymd+"'s line count is "+str(line_count))
+if DEBUG:
+    print(today_ymd+"'s line count is "+str(line_count))
 # Read the old history file
 if os.path.exists("history.json"):
     with open("history.json", "rt") as history_f:
          history = json.load(history_f)
-    print("Count of loglines per day over last "+str(retention)+" days is:")
-    print(history)
+    if DEBUG:
+        print("Count of loglines per day over last "+str(retention)+" days is:")
+        print(history)
 else:
     print("No history file found.")
 # find oldest date and update variable
@@ -123,17 +130,44 @@ plt.show()
 # Print the top 20 messages by device
 sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
 count = 20
-data = {}
-data['text'] = ["Here are the top talkers:"]
-data['Top Talkers'] = []
-print("Top "+str(count)+" talkers are: ")
+
+data = []
+data.append({"type": "section","text": {"type": "mrkdwn","text": "The top talkers are:"}})
+if DEBUG:
+    print("Top "+str(count)+" talkers are: ")
 for i in sorted_mc:
     if count > 0:
         num = 21 - count
-        print(i)
-        data['Top Talkers'].append({
-            num : i,
-        })
+        data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
+        if DEBUG:
+            print(i)
     count -= 1
+
 with open('message.json', 'wt') as message_f:
     json.dump(data, message_f, indent=4)
+
+# Message should be a valid dict or list https://api.slack.com/tools/block-kit-builder
+def post_to_slack(message):
+    slack_data = json.dumps({'blocks': message})
+    response = requests.post(
+        WEBHOOK_URL, data=slack_data,
+        headers={'Content-Type': 'application/json'}
+    )
+    if response.status_code != 200:
+        raise ValueError(
+            'Request to slack returned an error %s, the response is:\n%s'
+            % (response.status_code, response.text)
+        )
+
+#slack_token = OATH
+#client = slack.WebClient(token=slack_token)
+
+#client.chat_postMessage(
+#    channel="guy-test",
+#    text="Hello via OATH"
+#)
+
+post_to_slack(data)
+
+
+
