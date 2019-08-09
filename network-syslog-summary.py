@@ -25,7 +25,7 @@ import requests
 import slack
 from datetime import date, timedelta
 
-retention = 30
+
 message_count = {}
 line_count = 0
 now = datetime.datetime.now()
@@ -35,13 +35,15 @@ with open("server.json", "rt") as server_f:
 USERNAME = credentials["USERNAME"]
 SERVER = credentials["SERVER"]
 PATH = credentials["PATH"]
+RETENTION = int(credentials["DAYS"])
+USEWEBHOOK = 0 # set true if you can't use OATH, no graph with webhooks
 WEBHOOK_URL = credentials["WEBHOOK_PROD"]
-OATH = credentials["OATH_TOKEN_DEV"]
+OATH = credentials["OAUTH_TOKEN_BOT"]
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
-DEBUG = 0 # set to 1 for extra output
+DEBUG =0 # set to 1 for extra output and to disable slack posting
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
-oldest_d = today_d - timedelta(days = retention)
+oldest_d = today_d - timedelta(days = RETENTION)
 oldest_s = oldest_d.strftime("%Y-%m-%d")
 '''
 Copy today's log from the syslog server
@@ -81,7 +83,7 @@ if os.path.exists("history.json"):
     with open("history.json", "rt") as history_f:
          history = json.load(history_f)
     if DEBUG:
-        print("Count of loglines per day over last "+str(retention)+" days is:")
+        print("Count of loglines per day over last "+str(RETENTION)+" days is:")
         print(history)
 else:
     print("No history file found.")
@@ -96,13 +98,13 @@ if today_s not in history:
     print("Updating history data")
     # get rid of the oldest entry if exists and we have at least retention entries
     size = len(history)
-    if oldest_s in history and size >= retention:
+    if oldest_s in history and size >= RETENTION:
         print("Removing oldest entry, ", oldest_s)
         (history.pop(oldest_s))
     else:
         print("No deletion today: ")
-        if size < retention:
-            print("     Only "+str(size)+" entries out of "+str(retention)+" entries stored in history")
+        if size < RETENTION:
+            print("     Only "+str(size)+" entries out of "+str(RETENTION)+" entries stored in history")
         else:
             print("    "+oldest_s+" not in history")
     # add today's count
@@ -125,7 +127,9 @@ np_history = np.array(y_axis, dtype=np.int64)
 plt.title('Syslog Message Count over time')
 plt.xticks(rotation=30)
 plt.plot(x_axis, np_history)
-plt.show()
+if DEBUG:
+    plt.show()
+plt.savefig("plot.png")
 
 # Print the top 20 messages by device
 sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
@@ -147,7 +151,7 @@ with open('message.json', 'wt') as message_f:
     json.dump(data, message_f, indent=4)
 
 # Message should be a valid dict or list https://api.slack.com/tools/block-kit-builder
-def post_to_slack(message):
+def post_to_slack_webhook(message):
     slack_data = json.dumps({'blocks': message})
     response = requests.post(
         WEBHOOK_URL, data=slack_data,
@@ -159,15 +163,26 @@ def post_to_slack(message):
             % (response.status_code, response.text)
         )
 
-#slack_token = OATH
-#client = slack.WebClient(token=slack_token)
+# If you can use OATH, you'll get the graph too. Use one or the other
 
-#client.chat_postMessage(
-#    channel="guy-test",
-#    text="Hello via OATH"
-#)
+# 'data' needs to be a valid dict or list https://api.slack.com/tools/block-kit-builder
+slack_token = OATH
+client = slack.WebClient(token=slack_token)
 
-post_to_slack(data)
+if USEWEBHOOK == 1:
+    post_to_slack_webhook(data)
+else:
+    client.files_upload(
+        channels="its-networks",
+        file="plot.png",
+        title="Daily checks graph"
+    )
+    client.chat_postMessage(
+        channel="its-networks",
+        blocks=data
+    )
+
+
 
 
 

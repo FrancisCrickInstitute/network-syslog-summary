@@ -3,6 +3,6 @@
 	"SERVER":"server.domain.com",
 	"PATH":":/var/log/syslog-ng/path/folder/etc/",
 	"WEBHOOK_PROD": "https://hooks.slack.com/services/MY/PROD/WEBHOOK/PATH",
-	"WEBHOOK_DEV": "https://hooks.slack.com/services/MY/DEV/WEBHOOK/PATH",
-	"OATH_TOKEN_DEV": "TOKEN"
+	"OATH_TOKEN_BOT": "TOKEN",
+	"DAYS": "30"
 }
