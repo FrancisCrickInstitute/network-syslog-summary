@@ -1,18 +1,19 @@
 '''
- Script to summarise Cisco syslog and graph count over last retention period
- Output as follows:
+Script to summarise Cisco syslog, graph total message count over last retention period and post to Slack.
 
-switch.log-2019-07-17.gz's line count is 260459
+Historical data for RETENTION days is stored in history.json like this:
+{'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195}
 
-Count of loglines per day over last 7 days is:
-{'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195, '16-Jul': 291950, '17-Jul': 260459}
+Output is a graph of historical data + today's count, and the following text (sent to slack in json format):
 
-Top 20 talkers are: (this bit is obfruscated)
-('device_1 %MSG_A:', COUNT)
-('device_2 %MSG_B:', COUNT)
+The top talkers are:
+('device-01.domain.com %message-id-A:', 10362)
+('device-02.domain.com %message-id-B:', 10362)
+...
+('device-N.domain.com %message-id-Z:', 10362)
 etc
 
- Guy Morrell 2019-06
+Guy Morrell 2019-06
 '''
 import os
 import fnmatch
