@@ -10,7 +10,7 @@ Rename server_example.json to server.json locally and add your details.
 1. We aggregate all our switch logs into a single ```switch.log``` file
 2. network-syslog-summary takes the message-id and the name or IP of the device from each line and counts the total unique entries. 
 3. These are sorted in reverse order for quick reference and posted to our slack channel
-4. A graph is produced showing the previous N days' data for trend analysis. If you can use OAUTH this will also be posted to slack
+4. A graph is produced showing the previous RETENTION days' data for trend analysis. If you can use OAUTH this will also be posted to slack
 
 Output is a graph of historical data + today's count, and the following text (sent to slack in json format):  
 
