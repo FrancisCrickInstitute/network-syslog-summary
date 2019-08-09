@@ -42,6 +42,7 @@ USEWEBHOOK = credentials["WEBHOOK"] # set 1 in server.json if you can't use OATH
 WEBHOOK_URL = credentials["WEBHOOK_PROD"]
 DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output and to disable slack posting
 OATH = credentials["OAUTH_TOKEN_BOT"]
+SLACKCHANNEL = credentials["CHANNEL"]
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
@@ -177,12 +178,12 @@ if DEBUG == 0:
         post_to_slack_webhook(data)
     else:
         client.files_upload(
-            channels="its-networks",
+            channels=SLACKCHANNEL,
             file="plot.png",
             title="Daily checks graph"
         )
         client.chat_postMessage(
-            channel="its-networks",
+            channel=SLACKCHANNEL,
             blocks=data
         )
 
