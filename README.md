@@ -12,18 +12,12 @@ Output as follows:
 
 ![title](https://github.com/guymorrell/network-syslog-summary/blob/master/myplot.png)
 
-```switch.log-2019-07-17.gz's line count is 260459
-
-Count of loglines per day over last 7 days is:
-
-{'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195, '16-Jul': 291950, '17-Jul': 260459}
-
-Top 20 talkers are: (this bit is obfruscated)
-
-('device_1 %MSG_A:', COUNT)
-
-('device_2 %MSG_B:', COUNT)
-
+```
+The top talkers are:
+('device-01.domain.com %message-id-A:', 10362)
+('device-02.domain.com %message-id-B:', 10362)
+...
+('device-N.domain.com %message-id-Z:', 10362)
 etc
 ```
 
