@@ -134,7 +134,7 @@ if DEBUG:
     plt.show()
 plt.savefig("plot.png")
 
-# Print the top 20 messages by device
+# Produce the top TALKERCOUNT messages by device
 sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
 count = TALKERCOUNT
 onemore = TALKERCOUNT + 1
@@ -151,10 +151,10 @@ for i in sorted_mc:
             print(i)
     count -= 1
 
+# 'data' needs to be a valid dict or list https://api.slack.com/tools/block-kit-builder
 with open('message.json', 'wt') as message_f:
     json.dump(data, message_f, indent=4)
 
-# Message should be a valid dict or list https://api.slack.com/tools/block-kit-builder
 def post_to_slack_webhook(message):
     slack_data = json.dumps({'blocks': message})
     response = requests.post(
@@ -168,10 +168,7 @@ def post_to_slack_webhook(message):
         )
 
 # If you can use OATH, you'll get the graph too. Use one or the other
-
-# 'data' needs to be a valid dict or list https://api.slack.com/tools/block-kit-builder
-slack_token = OATH
-client = slack.WebClient(token=slack_token)
+client = slack.WebClient(token=OATH)
 
 if DEBUG == 0:
     if USEWEBHOOK == 1:
