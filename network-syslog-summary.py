@@ -37,11 +37,12 @@ USERNAME = credentials["USERNAME"]
 SERVER = credentials["SERVER"]
 PATH = credentials["PATH"]
 RETENTION = int(credentials["DAYS"])
+TALKERCOUNT = credentials["TOPTALKERS"]
 USEWEBHOOK = 0 # set true if you can't use OATH, no graph with webhooks
 WEBHOOK_URL = credentials["WEBHOOK_PROD"]
 OATH = credentials["OAUTH_TOKEN_BOT"]
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
-DEBUG =0 # set to 1 for extra output and to disable slack posting
+DEBUG = 0 # set to 1 for local output and to disable slack posting
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
 oldest_d = today_d - timedelta(days = RETENTION)
@@ -134,15 +135,16 @@ plt.savefig("plot.png")
 
 # Print the top 20 messages by device
 sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
-count = 20
-
+count = TALKERCOUNT
+onemore = TALKERCOUNT + 1
 data = []
-data.append({"type": "section","text": {"type": "mrkdwn","text": "The top talkers are:"}})
+talkerstring = "The top "+str(TALKERCOUNT)+" talkers are:"
+data.append({"type": "section","text": {"type": "mrkdwn","text": talkerstring}})
 if DEBUG:
-    print("Top "+str(count)+" talkers are: ")
+    print(talkerstring)
 for i in sorted_mc:
     if count > 0:
-        num = 21 - count
+        num = onemore - count # num starts at 1 and goes up to TALKERCOUNT
         data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
         if DEBUG:
             print(i)
@@ -170,18 +172,19 @@ def post_to_slack_webhook(message):
 slack_token = OATH
 client = slack.WebClient(token=slack_token)
 
-if USEWEBHOOK == 1:
-    post_to_slack_webhook(data)
-else:
-    client.files_upload(
-        channels="its-networks",
-        file="plot.png",
-        title="Daily checks graph"
-    )
-    client.chat_postMessage(
-        channel="its-networks",
-        blocks=data
-    )
+if DEBUG == 0:
+    if USEWEBHOOK == 1:
+        post_to_slack_webhook(data)
+    else:
+        client.files_upload(
+            channels="its-networks",
+            file="plot.png",
+            title="Daily checks graph"
+        )
+        client.chat_postMessage(
+            channel="its-networks",
+            blocks=data
+        )
 
 
 
