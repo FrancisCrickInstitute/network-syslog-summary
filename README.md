@@ -2,7 +2,8 @@
 Script to summarise Cisco syslog, graph total message count over last retention period and post to Slack.
 
 Historical data for RETENTION days is stored in history.json like this:
-```json{'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195}
+```json
+{'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195}
 ```
 The script is to aid daily operational checks in a busy NOC. Suggest it is run daily via cron.  
 Rename server_example.json to server.json locally and add your details.
