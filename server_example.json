@@ -4,6 +4,8 @@
 	"PATH":":/var/log/syslog-ng/path/folder/etc/",
 	"WEBHOOK_PROD": "https://hooks.slack.com/services/MY/PROD/WEBHOOK/PATH",
 	"OATH_TOKEN_BOT": "TOKEN",
-	"DAYS": "30",
-	"TOPTALKERS": 10
+	"DAYS": 30,
+	"TOPTALKERS": 10,
+	"LOCALPOST": 0,
+	"WEBHOOK": 0
 }

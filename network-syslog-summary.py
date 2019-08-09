@@ -1,12 +1,13 @@
 '''
-Script to summarise Cisco syslog, graph total message count over last retention period and post to Slack.
+Script to summarise Cisco syslog into top N talkers by message and device, graph total message count over last retention
+period and post to Slack in json format.
 
 Historical data for RETENTION days is stored in history.json like this:
 {'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195}
 
-Output is a graph of historical data + today's count, and the following text (sent to slack in json format):
+Output is a graph of historical data + today's count, and the following text:
 
-The top talkers are:
+The top N talkers are:
 ('device-01.domain.com %message-id-A:', 10362)
 ('device-02.domain.com %message-id-B:', 10362)
 ...
@@ -26,7 +27,6 @@ import requests
 import slack
 from datetime import date, timedelta
 
-
 message_count = {}
 line_count = 0
 now = datetime.datetime.now()
@@ -38,11 +38,11 @@ SERVER = credentials["SERVER"]
 PATH = credentials["PATH"]
 RETENTION = int(credentials["DAYS"])
 TALKERCOUNT = credentials["TOPTALKERS"]
-USEWEBHOOK = 0 # set true if you can't use OATH, no graph with webhooks
+USEWEBHOOK = credentials["WEBHOOK"] # set 1 in server.json if you can't use OATH (no graph though)
 WEBHOOK_URL = credentials["WEBHOOK_PROD"]
+DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output and to disable slack posting
 OATH = credentials["OAUTH_TOKEN_BOT"]
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
-DEBUG = 0 # set to 1 for local output and to disable slack posting
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
 oldest_d = today_d - timedelta(days = RETENTION)
