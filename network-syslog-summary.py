@@ -24,7 +24,7 @@ import gzip
 import json
 import datetime
 import requests
-import slack
+import slack # module is called slackclient
 from datetime import date, timedelta
 
 message_count = {}

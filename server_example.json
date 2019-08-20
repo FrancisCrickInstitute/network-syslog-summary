@@ -1,6 +1,6 @@
 {
-	"USERNAME":"my_login",
-	"SERVER":"server.domain.com",
+	"USERNAME":"netadmin",
+	"SERVER":"syslog-srv.domain",
 	"PATH":":/var/log/syslog-ng/path/folder/etc/",
 	"WEBHOOK_PROD": "https://hooks.slack.com/services/MY/PROD/WEBHOOK/PATH",
 	"OATH_TOKEN_BOT": "TOKEN",
