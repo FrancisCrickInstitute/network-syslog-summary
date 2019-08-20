@@ -30,8 +30,8 @@ The top N talkers are:
 ('device-N.domain.com %message-id-Z:', 10362)
 etc
 ```
-## running the script
-### SSH
+## Running the script
+### ssh
 We run this script on our network automation server 'net-auto-srv'. It copies the file from our syslog server 'syslog-srv'. To simplify things we have a 'netadmin' account on each and use rsa certificate for passwordless transfers. 
 ```
 ssh-keygen -t rsa -b 4096 -C "netadmin@net-auto-srv.domain"
