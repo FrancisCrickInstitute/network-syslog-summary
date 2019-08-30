@@ -30,4 +30,43 @@ The top N talkers are:
 ('device-N.domain.com %message-id-Z:', 10362)
 etc
 ```
+## Running the script
+### ssh
+We run this script on our network automation server 'net-auto-srv'. It copies the file from our syslog server 'syslog-srv'. To simplify things we have a 'netadmin' account on each and use an rsa certificate for passwordless transfers. 
+```
+ssh-keygen -t rsa -b 4096 -C "netadmin@net-auto-srv.domain"
+copy id_rsa.pub from net-auto-srv:/home/netadmin/.ssh/ to syslog-srv:/home/netadmin/.ssh/authorized_keys
+```
+You'll want to check you can ssh from net-auto-srv to syslog-srv as the netadmin user without a password before running the script.
+### pipenv
+We use python3 with [pipenv](https://docs.python-guide.org/dev/virtualenvs) to simplify dependencies. Our stock Centos build was missing pip. To get things up and running I did the following as the 'netadmin' user:
+* `sudo yum install python-pip`
+* Install [linuxbrew](https://docs.brew.sh/Homebrew-on-Linux)
+* `brew install pipenv`
+* `pipenv install matplotlib `
+* `pipenv install requests`
+* `pipenv install slackclient`
+* `contab -e`
 
+Cron needs to run the script from within the local directory for pipenv to have the right environment variables to run properly. Without this it will spin up a new virtual environment and then fail as no modules will have been installed. The Crontab looks like this:
+```
+59 07 * * *  cd /home/netadmin/network-syslog-summary/ && /home/linuxbrew/.linuxbrew/bin/pipenv run python network-syslog-summary.py  2>&1 /dev/null
+```
+Pipfile in `/home/netadmin/network-syslog-summary` looks like this:
+
+```
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+matplotlib = "*"
+requests = "*"
+slackclient = "*"
+
+[requires]
+python_version = "3.6"
+```
