@@ -43,6 +43,7 @@ WEBHOOK_URL = credentials["WEBHOOK_PROD"]
 DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output and to disable slack posting
 OATH = credentials["OAUTH_TOKEN_BOT"]
 SLACKCHANNEL = credentials["CHANNEL"]
+SKIP = credentials["IGNORE"] # any messages we may skip
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
@@ -68,17 +69,19 @@ for filename in os.listdir():
 for line in log:
     line_count += 1
     # Grab the unique message id, e.g. %DOT1X-5-FAIL:
-    message_id = line.strip().split()[9]
-    # Grab the name or IP of the device
-    device_id = line.strip().split()[3]
-    # Combine for easy counting
-    device_message = device_id + " " + message_id
-    if device_message not in message_count:
-        message_count[device_message] = 1
-    else:
-        count = message_count[device_message]
-        count += 1
-        message_count[device_message] = count
+    line_list = line.strip().split()
+    if len(line_list) > 8:
+        message_id = line.strip().split()[9]
+        # Grab the name or IP of the device
+        device_id = line.strip().split()[3]
+        # Combine for easy counting
+        device_message = device_id + " " + message_id
+        if device_message not in message_count:
+            message_count[device_message] = 1
+        else:
+            count = message_count[device_message]
+            count += 1
+            message_count[device_message] = count
 if DEBUG:
     print(today_ymd+"'s line count is "+str(line_count))
 # Read the old history file
