@@ -156,14 +156,14 @@ if DEBUG:
 plt.savefig("plot.png")
 
 msgcount = TALKERCOUNT
-onemore = TALKERCOUNT + 1
+onemore = TALKERCOUNT
 # Produce the top TALKERCOUNT messages by count
 messagestring = "The top "+str(TALKERCOUNT)+" messages across the whole network by count are:"
 message_data = []
 message_data.append({"type": "section","text": {"type": "mrkdwn","text": messagestring}})
 for i in sorted_gmc:
     if msgcount > 0:
-        num = onemore - msgcount # num starts at 1 and goes up to TALKERCOUNT
+        num = onemore - msgcount # num starts at 0 and goes up to TALKERCOUNT -1
         message_data.append({'type': "section", "text": {"text": str(sorted_gmc[num]), "type": "mrkdwn"}})
         if DEBUG:
             print(i)
@@ -177,7 +177,7 @@ if DEBUG:
     print(talkerstring)
 for j in sorted_mc:
     if count > 0:
-        num = onemore - count # num starts at 1 and goes up to TALKERCOUNT
+        num = onemore - count # num starts at 0 and goes up to TALKERCOUNT -1
         data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
         if DEBUG:
             print(j)
