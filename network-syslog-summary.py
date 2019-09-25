@@ -23,10 +23,12 @@ import numpy as np
 import gzip
 import json
 import datetime
-import requests
+import requests # module is called requests
 import slack # module is called slackclient
 from datetime import date, timedelta
 
+global_count = {}
+sorted_gmc = {}
 message_count = {}
 line_count = 0
 now = datetime.datetime.now()
@@ -39,7 +41,7 @@ PATH = credentials["PATH"]
 RETENTION = int(credentials["DAYS"])
 TALKERCOUNT = credentials["TOPTALKERS"]
 USEWEBHOOK = credentials["WEBHOOK"] # set 1 in server.json if you can't use OATH (no graph though)
-WEBHOOK_URL = credentials["WEBHOOK_PROD"]
+WEBHOOK_URL = credentials["WEBHOOK_DEV"]
 DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output and to disable slack posting
 OATH = credentials["OAUTH_TOKEN_BOT"]
 SLACKCHANNEL = credentials["CHANNEL"]
@@ -65,7 +67,11 @@ for filename in os.listdir():
     if fnmatch.fnmatch(filename, 'switch.log*'):
         if not fnmatch.fnmatch(filename, today_ymd):
             os.remove(filename)
-# Count unique messaage_id / name combined messages and store in message_count dict
+''' 
+Count unique message_id
+ Store in global_count dict for network wide counts
+ Combine message_id with hostname and and store in message_count dict for device specific counts
+'''
 for line in log:
     line_count += 1
     # Grab the unique message id, e.g. %DOT1X-5-FAIL:
@@ -82,8 +88,20 @@ for line in log:
             count = message_count[device_message]
             count += 1
             message_count[device_message] = count
+        # Now increment the global count of this message_id
+        if message_id not in global_count:
+            global_count[message_id] = 1
+        else:
+            global_count[message_id] += 1
+# Create a reverse sorted list by global count of message_id's
+sorted_gmc = sorted(global_count.items(), key=lambda x: x[1], reverse=1)
+# Create a reverse sorted list by device count of message_id's
+sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
+
 if DEBUG:
     print(today_ymd+"'s line count is "+str(line_count))
+    for msg_id,counted in sorted_gmc:
+        print(msg_id,": ",counted)
 # Read the old history file
 if os.path.exists("history.json"):
     with open("history.json", "rt") as history_f:
@@ -119,7 +137,7 @@ if today_s not in history:
     with open('history.json', 'w') as outfile:
         json.dump(history, outfile)
 
-# Plot a graph of the last retention days' data
+# Plot a graph of the last retention days' data (total syslog message count for trend analysis)
 pos = 0
 x_axis = []
 y_axis = []
@@ -137,26 +155,33 @@ if DEBUG:
     plt.show()
 plt.savefig("plot.png")
 
-# Produce the top TALKERCOUNT messages by device
-sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
-count = TALKERCOUNT
+msgcount = TALKERCOUNT
 onemore = TALKERCOUNT + 1
+# Produce the top TALKERCOUNT messages by count
+messagestring = "The top "+str(TALKERCOUNT)+" messages across the whole network by count are:"
+message_data = []
+message_data.append({"type": "section","text": {"type": "mrkdwn","text": messagestring}})
+for i in sorted_gmc:
+    if msgcount > 0:
+        num = onemore - msgcount # num starts at 1 and goes up to TALKERCOUNT
+        message_data.append({'type': "section", "text": {"text": str(sorted_gmc[num]), "type": "mrkdwn"}})
+        if DEBUG:
+            print(i)
+    msgcount -= 1
+count = TALKERCOUNT
+# Produce the top TALKERCOUNT messages by device
 data = []
-talkerstring = "The top "+str(TALKERCOUNT)+" talkers are:"
+talkerstring = "The top "+str(TALKERCOUNT)+" counts of device/message_id combinations are:"
 data.append({"type": "section","text": {"type": "mrkdwn","text": talkerstring}})
 if DEBUG:
     print(talkerstring)
-for i in sorted_mc:
+for j in sorted_mc:
     if count > 0:
         num = onemore - count # num starts at 1 and goes up to TALKERCOUNT
         data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
         if DEBUG:
-            print(i)
+            print(j)
     count -= 1
-
-# 'data' needs to be a valid dict or list https://api.slack.com/tools/block-kit-builder
-with open('message.json', 'wt') as message_f:
-    json.dump(data, message_f, indent=4)
 
 def post_to_slack_webhook(message):
     slack_data = json.dumps({'blocks': message})
@@ -175,12 +200,17 @@ client = slack.WebClient(token=OATH)
 
 if DEBUG == 0:
     if USEWEBHOOK == 1:
+        post_to_slack_webhook(message_data)
         post_to_slack_webhook(data)
     else:
         client.files_upload(
             channels=SLACKCHANNEL,
             file="plot.png",
             title="Daily checks graph"
+        )
+        client.chat_postMessage(
+            channel=SLACKCHANNEL,
+            blocks=message_data
         )
         client.chat_postMessage(
             channel=SLACKCHANNEL,
