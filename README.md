@@ -23,11 +23,18 @@ Output as follows:
 ![Graph](https://github.com/guymorrell/network-syslog-summary/blob/master/myplot.png)
 
 ```
-The top N talkers are:
-('device-01.domain.com %message-id-A:', 10362)
-('device-02.domain.com %message-id-B:', 10362)
+The top N messages across the whole network are:
+('%message-id-foo:', 158364)
+('%message-id-bar:', 76566)
 ...
-('device-N.domain.com %message-id-Z:', 10362)
+('%message-id-baz:', 207)
+
+The top 10 counts of device/message_id combinations are:
+The top N talkers are:
+('device-01.domain.com %message-id-foo:', 10362)
+('device-02.domain.com %message-id-bat:', 10362)
+...
+('device-N.domain.com %message-id-bong:', 10362)
 etc
 ```
 ## Running the script
