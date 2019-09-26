@@ -1,6 +1,6 @@
 # network-syslog-summary
 Script to summarise Cisco syslog into top N talkers by message and device, graph total message count over last retention
-period and post to Slack 
+period and post to Slack. Optionally, you can filter out noisy messages from the top ten devices.
 
 The script is to aid daily operational checks in a busy NOC. 
 Suggest it is run daily via cron.  Rename server_example.json to server.json locally and add your details.
