@@ -178,9 +178,7 @@ data.append({"type": "section","text": {"type": "mrkdwn","text": talkerstring}})
 if DEBUG:
     print(talkerstring)
     print(SKIP)
-    print(len(SKIP))
-
-if (IGNORE):
+if IGNORE:
     for j in sorted_mc:
         # Ignore message IDs listed in SKIP
         match = 0
@@ -189,17 +187,18 @@ if (IGNORE):
                 match = 1
         if match == 0: # only print if the message isn't in the list called 'SKIP'
             if count > 0:
-                num = onemore - count # num starts at 0 and goes up to TALKERCOUNT -1
-                data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
+                #num = onemore - count # num starts at 0 and goes up to TALKERCOUNT -1
+                data.append({'type': "section", "text": {"text": str(j), "type": "mrkdwn"}})
                 if DEBUG:
+                    print("SKIP hit")
                     print(j)
             count -= 1
 else:
     for j in sorted_mc:
         if count > 0:
-            num = onemore - count # num starts at 0 and goes up to TALKERCOUNT -1
-            data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
+            data.append({'type': "section", "text": {"text": str(j), "type": "mrkdwn"}})
             if DEBUG:
+                print("Skip miss)")
                 print(j)
         count -= 1
 
