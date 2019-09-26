@@ -158,27 +158,22 @@ if DEBUG:
 plt.savefig("plot.png")
 
 msgcount = TALKERCOUNT
-onemore = TALKERCOUNT
 # Produce the top TALKERCOUNT messages by count
 messagestring = "The top "+str(TALKERCOUNT)+" messages across the whole network by count are:"
 message_data = []
 message_data.append({"type": "section","text": {"type": "mrkdwn","text": messagestring}})
 for i in sorted_gmc:
     if msgcount > 0:
-        num = onemore - msgcount # num starts at 0 and goes up to TALKERCOUNT -1
-        message_data.append({'type': "section", "text": {"text": str(sorted_gmc[num]), "type": "mrkdwn"}})
+        message_data.append({'type': "section", "text": {"text": str(i), "type": "mrkdwn"}})
         if DEBUG:
             print(i)
     msgcount -= 1
-count = TALKERCOUNT
 # Produce the top TALKERCOUNT messages by device
 data = []
-talkerstring = "The top "+str(TALKERCOUNT)+" counts of device/message_id combinations are:"
-data.append({"type": "section","text": {"type": "mrkdwn","text": talkerstring}})
-if DEBUG:
-    print(talkerstring)
-    print(SKIP)
+count = TALKERCOUNT
 if IGNORE:
+    talkerstring = "The top " + str(TALKERCOUNT) + " counts of device/message_id combinations excluding "+str(SKIP) +" are:"
+    data.append({"type": "section", "text": {"type": "mrkdwn", "text": talkerstring}})
     for j in sorted_mc:
         # Ignore message IDs listed in SKIP
         match = 0
@@ -194,6 +189,8 @@ if IGNORE:
                     print(j)
             count -= 1
 else:
+    talkerstring = "The top " + str(TALKERCOUNT) + " counts of device/message_id combinations are:"
+    data.append({"type": "section", "text": {"type": "mrkdwn", "text": talkerstring}})
     for j in sorted_mc:
         if count > 0:
             data.append({'type': "section", "text": {"text": str(j), "type": "mrkdwn"}})
