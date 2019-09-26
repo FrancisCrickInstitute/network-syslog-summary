@@ -26,6 +26,7 @@ import datetime
 import requests # module is called requests
 import slack # module is called slackclient
 from datetime import date, timedelta
+import re
 
 global_count = {}
 sorted_gmc = {}
@@ -45,7 +46,8 @@ WEBHOOK_URL = credentials["WEBHOOK_PROD"]
 DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output and to disable slack posting
 OATH = credentials["OAUTH_TOKEN_BOT"]
 SLACKCHANNEL = credentials["CHANNEL"]
-SKIP = credentials["IGNORE"] # any messages we may skip
+SKIP = credentials["IGNORE_LIST"].split(",") # any messages we may skip
+IGNORE = credentials["IGNORE"]
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
@@ -175,13 +177,31 @@ talkerstring = "The top "+str(TALKERCOUNT)+" counts of device/message_id combina
 data.append({"type": "section","text": {"type": "mrkdwn","text": talkerstring}})
 if DEBUG:
     print(talkerstring)
-for j in sorted_mc:
-    if count > 0:
-        num = onemore - count # num starts at 0 and goes up to TALKERCOUNT -1
-        data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
-        if DEBUG:
-            print(j)
-    count -= 1
+    print(SKIP)
+    print(len(SKIP))
+
+if (IGNORE):
+    for j in sorted_mc:
+        # Ignore message IDs listed in SKIP
+        match = 0
+        for skippedmessage in SKIP:
+            if re.search(str(skippedmessage), str(j)): # ignore it f any element in SKIP matches the current message
+                match = 1
+        if match == 0: # only print if the message isn't in the list called 'SKIP'
+            if count > 0:
+                num = onemore - count # num starts at 0 and goes up to TALKERCOUNT -1
+                data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
+                if DEBUG:
+                    print(j)
+            count -= 1
+else:
+    for j in sorted_mc:
+        if count > 0:
+            num = onemore - count # num starts at 0 and goes up to TALKERCOUNT -1
+            data.append({'type': "section", "text": {"text": str(sorted_mc[num]), "type": "mrkdwn"}})
+            if DEBUG:
+                print(j)
+        count -= 1
 
 def post_to_slack_webhook(message):
     slack_data = json.dumps({'blocks': message})
