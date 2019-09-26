@@ -8,5 +8,7 @@
 	"TOPTALKERS": 10,
 	"LOCALPOST": 0,
 	"WEBHOOK": 0,
-	"CHANNEL": "my-slack-channel"
+	"CHANNEL": "my-slack-channel",
+	"IGNORE_LIST" : "MSG-ID-FOO,MSG-ID-BAR",
+    "IGNORE": 1
 }
