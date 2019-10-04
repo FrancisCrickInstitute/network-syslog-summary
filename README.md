@@ -1,4 +1,4 @@
-# network-syslog-summary
+# network_syslog_summary
 Script to summarise Cisco syslog into top N talkers by message and device, graph total message count over last retention
 period and post to Slack. Optionally, you can filter out noisy messages from the top ten devices.
 
