@@ -1,6 +1,6 @@
 '''
-Script to summarise Cisco syslog into top N talkers by message and device, graph total message count over last retention
-period and post to Slack in json format.
+Script to summarise Cisco syslog into top N talkers by message and device, graph total message
+count over last retention period and post to Slack in json format.
 
 Historical data for RETENTION days is stored in history.json like this:
 {'11-Jul': 406169, '12-Jul': 406169, '13-Jul': 300845, '14-Jul': 300845, '15-Jul': 229195}
@@ -18,22 +18,24 @@ Guy Morrell 2019-06
 '''
 import os
 import fnmatch
-import matplotlib.pyplot as plt
-import numpy as np
+import datetime
+from datetime import date, timedelta
 import gzip
 import json
-import datetime
+import re
+import matplotlib.pyplot as plt
+import numpy as np
 import requests # module is called requests
 import slack # module is called slackclient
-from datetime import date, timedelta
-import re
+
 
 global_count = {}
 sorted_gmc = {}
 message_count = {}
 line_count = 0
 now = datetime.datetime.now()
-today_ymd = "switch.log-"+now.strftime("%Y")+"-"+now.strftime("%m")+"-"+now.strftime("%d")+".gz"# YYYY-MM-DD
+# YYYY-MM-DD
+today_ymd = "switch.log-"+now.strftime("%Y")+"-"+now.strftime("%m")+"-"+now.strftime("%d")+".gz"
 with open("server.json", "rt") as server_f:
     credentials = json.load(server_f)
 USERNAME = credentials["USERNAME"]
@@ -43,7 +45,7 @@ RETENTION = int(credentials["DAYS"])
 TALKERCOUNT = credentials["TOPTALKERS"]
 USEWEBHOOK = credentials["WEBHOOK"] # set 1 in server.json if you can't use OATH (no graph though)
 WEBHOOK_URL = credentials["WEBHOOK_PROD"]
-DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output and to disable slack posting
+DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output & disable slack posting
 OATH = credentials["OAUTH_TOKEN_BOT"]
 SLACKCHANNEL = credentials["CHANNEL"]
 SKIP = credentials["IGNORE_LIST"].split(",") # any messages we may skip
@@ -51,13 +53,14 @@ IGNORE = credentials["IGNORE"]
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
-oldest_d = today_d - timedelta(days = RETENTION)
+oldest_d = today_d - timedelta(days=RETENTION)
 oldest_s = oldest_d.strftime("%Y-%m-%d")
-'''
-Copy today's log from the syslog server
-Name format for yesterday's log is switch.log-YYYY-MM-DD.gz, where DD = today, as the rotation happens at 06:00
-Need to cope with the script running multiple times in one day and should delete old logfiles
-'''
+
+# Copy today's log from the syslog server
+# Name format for yesterday's log is switch.log-YYYY-MM-DD.gz, where DD = today, as the
+# rotation happens at 06:00. Need to cope with the script running multiple times in one
+# day and should delete old logfiles
+
 if not os.path.exists(today_ymd):
     print("Copying file")
     os.system(ARG) # copy yesterday's file to the local folder
@@ -69,11 +72,10 @@ for filename in os.listdir():
     if fnmatch.fnmatch(filename, 'switch.log*'):
         if not fnmatch.fnmatch(filename, today_ymd):
             os.remove(filename)
-''' 
-Count unique message_id
- Store in global_count dict for network wide counts
- Combine message_id with hostname and and store in message_count dict for device specific counts
-'''
+
+# Count unique message_id and store in global_count dict for network wide counts
+# Combine message_id with hostname and and store in message_count dict for device specific counts
+
 for line in log:
     line_count += 1
     # Grab the unique message id, e.g. %DOT1X-5-FAIL:
@@ -102,12 +104,12 @@ sorted_mc = sorted(message_count.items(), key=lambda x: x[1], reverse=1)
 
 if DEBUG:
     print(today_ymd+"'s line count is "+str(line_count))
-    for msg_id,counted in sorted_gmc:
-        print(msg_id,": ",counted)
+    for msg_id, counted in sorted_gmc:
+        print(msg_id, ": ", counted)
 # Read the old history file
 if os.path.exists("history.json"):
     with open("history.json", "rt") as history_f:
-         history = json.load(history_f)
+        history = json.load(history_f)
     if DEBUG:
         print("Count of loglines per day over last "+str(RETENTION)+" days is:")
         print(history)
@@ -130,7 +132,7 @@ if today_s not in history:
     else:
         print("No deletion today: ")
         if size < RETENTION:
-            print("     Only "+str(size)+" entries out of "+str(RETENTION)+" entries stored in history")
+            print("Only "+str(size)+" entries out of "+str(RETENTION)+" entries stored in history")
         else:
             print("    "+oldest_s+" not in history")
     # add today's count
@@ -161,7 +163,7 @@ msgcount = TALKERCOUNT
 # Produce the top TALKERCOUNT messages by count
 messagestring = "The top "+str(TALKERCOUNT)+" messages across the whole network by count are:"
 message_data = []
-message_data.append({"type": "section","text": {"type": "mrkdwn","text": messagestring}})
+message_data.append({"type": "section", "text": {"type": "mrkdwn", "text": messagestring}})
 for i in sorted_gmc:
     if msgcount > 0:
         message_data.append({'type': "section", "text": {"text": str(i), "type": "mrkdwn"}})
@@ -172,13 +174,14 @@ for i in sorted_gmc:
 data = []
 count = TALKERCOUNT
 if IGNORE:
-    talkerstring = "The top " + str(TALKERCOUNT) + " counts of device/message_id combinations excluding "+str(SKIP) +" are:"
+    talkerstring = "The top " + str(TALKERCOUNT) + """ counts of device/message_id combinations
+    excluding """+str(SKIP) +" are:"
     data.append({"type": "section", "text": {"type": "mrkdwn", "text": talkerstring}})
     for j in sorted_mc:
         # Ignore message IDs listed in SKIP
         match = 0
-        for skippedmessage in SKIP:
-            if re.search(str(skippedmessage), str(j)): # ignore it f any element in SKIP matches the current message
+        for skippedmessage in SKIP: # ignore it if any element in SKIP matches the current message j
+            if re.search(str(skippedmessage), str(j)):
                 match = 1
         if match == 0: # only print if the message isn't in the list called 'SKIP'
             if count > 0:
@@ -198,8 +201,8 @@ else:
                 print("Skip miss)")
                 print(j)
         count -= 1
-
 def post_to_slack_webhook(message):
+    """Post message to slack with error checking."""
     slack_data = json.dumps({'blocks': message})
     response = requests.post(
         WEBHOOK_URL, data=slack_data,
@@ -232,8 +235,3 @@ if DEBUG == 0:
             channel=SLACKCHANNEL,
             blocks=data
         )
-
-
-
-
-

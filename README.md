@@ -1,4 +1,4 @@
-# network-syslog-summary
+# network_syslog_summary
 Script to summarise Cisco syslog into top N talkers by message and device, graph total message count over last retention
 period and post to Slack. Optionally, you can filter out noisy messages from the top ten devices.
 
@@ -57,9 +57,9 @@ We use python3 with [pipenv](https://docs.python-guide.org/dev/virtualenvs) to s
 
 Cron needs to run the script from within the local directory for pipenv to have the right environment variables to run properly. Without this it will spin up a new virtual environment and then fail as no modules will have been installed. The Crontab looks like this:
 ```
-59 07 * * *  cd /home/netadmin/network-syslog-summary/ && /home/linuxbrew/.linuxbrew/bin/pipenv run python network-syslog-summary.py  2>&1 /dev/null
+59 07 * * *  cd /home/netadmin/network_syslog_summary/ && /home/linuxbrew/.linuxbrew/bin/pipenv run python network_syslog_summary.py  2>&1 /dev/null
 ```
-Pipfile in `/home/netadmin/network-syslog-summary` looks like this:
+Pipfile in `/home/netadmin/network_syslog_summary` looks like this:
 
 ```
 [[source]]
