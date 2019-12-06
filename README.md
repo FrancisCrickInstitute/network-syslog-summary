@@ -3,7 +3,9 @@ Script to summarise Cisco syslog into top N talkers by message and device, graph
 period and post to Slack. Optionally, you can filter out noisy messages from the top ten devices.
 
 The script is to aid daily operational checks in a busy NOC. 
-Suggest it is run daily via cron.  Rename server_example.json to server.json locally and add your details.
+Suggest it is run daily via cron.  
+
+Rename server_example.json to server.json locally and add your syslog and slack details as well as lists of messages you wish to ignore or highlight. 
 
 Note:
 1. We aggregate all our switch logs into a single ```switch.log``` file. You will need to do this.
