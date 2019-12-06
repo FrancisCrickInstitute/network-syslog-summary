@@ -10,5 +10,6 @@
 	"WEBHOOK": 0,
 	"CHANNEL": "my-slack-channel",
 	"IGNORE_LIST" : "MSG-ID-FOO,MSG-ID-BAR",
-    "IGNORE": 1
+	"TIDY_OUTPUT": 1,
+	"CRITICAL_LIST":"MSG-ID-BAZ,MSG-ID-BAM"
 }
