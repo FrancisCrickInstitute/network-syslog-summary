@@ -49,7 +49,8 @@ DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output & di
 OATH = credentials["OAUTH_TOKEN_BOT"]
 SLACKCHANNEL = credentials["CHANNEL"]
 SKIP = credentials["IGNORE_LIST"].split(",") # any messages we may skip
-IGNORE = credentials["IGNORE"]
+TIDY = credentials["TIDY_OUTPUT"]
+CRITICAL = credentials["CRITICAL_LIST"].split(",") # messages which need immediate action
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
@@ -161,21 +162,29 @@ plt.savefig("plot.png")
 
 msgcount = TALKERCOUNT
 # Produce the top TALKERCOUNT messages by count
-messagestring = "The top "+str(TALKERCOUNT)+" messages across the whole network by count are:"
+messagestring = "The top "+str(TALKERCOUNT)+" messages across the whole network and with \n :warning: " \
+                                            "*"+str(CRITICAL)+"* :warning: \n highlighted if found by count are:"
 message_data = []
 message_data.append({"type": "section", "text": {"type": "mrkdwn", "text": messagestring}})
 for i in sorted_gmc:
     if msgcount > 0:
-        message_data.append({'type': "section", "text": {"text": str(i), "type": "mrkdwn"}})
+        match = 0
+        for criticalmessage in CRITICAL:  # warn if current message i is on a watch list
+            if re.search(str(criticalmessage), str(i)):
+                match = 1
+        if match == 1:
+            message_data.append({'type': "section", "text": {"text": " :warning: * "+str(i).rstrip()+"*:warning:\n", "type": "mrkdwn"}})
+        else:
+            message_data.append({'type': "section", "text": {"text": str(i), "type": "mrkdwn"}})
         if DEBUG:
             print(i)
     msgcount -= 1
 # Produce the top TALKERCOUNT messages by device
 data = []
 count = TALKERCOUNT
-if IGNORE:
+if TIDY:
     talkerstring = "The top " + str(TALKERCOUNT) + """ counts of device/message_id combinations
-    excluding """+str(SKIP) +" are:"
+    excluding """+str(SKIP) +"are:"
     data.append({"type": "section", "text": {"type": "mrkdwn", "text": talkerstring}})
     for j in sorted_mc:
         # Ignore message IDs listed in SKIP
@@ -185,8 +194,14 @@ if IGNORE:
                 match = 1
         if match == 0: # only print if the message isn't in the list called 'SKIP'
             if count > 0:
-                #num = onemore - count # num starts at 0 and goes up to TALKERCOUNT -1
-                data.append({'type': "section", "text": {"text": str(j), "type": "mrkdwn"}})
+                match2 = 0 # highlight critical log messages
+                for criticalmessage in CRITICAL:  # warn if current message j is on a watch list
+                    if re.search(str(criticalmessage), str(j)):
+                        match2 = 1
+                if match2 == 1:
+                    data.append({'type': "section", "text": {"text": " :warning: *"+str(j).rstrip()+"*:warning:\n", "type": "mrkdwn"}})
+                else:
+                    data.append({'type': "section", "text": {"text": str(j), "type": "mrkdwn"}})
                 if DEBUG:
                     print("SKIP hit")
                     print(j)
