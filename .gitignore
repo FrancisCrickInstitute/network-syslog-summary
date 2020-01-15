@@ -1,0 +1,7 @@
+# secret info
+server.json
+# locally significant only
+history.json
+plot.png
+switch.log*
+venv/
