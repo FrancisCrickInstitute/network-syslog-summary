@@ -46,7 +46,7 @@ We run this script on our network automation server 'net-auto-srv'. It copies th
 ssh-keygen -t rsa -b 4096 -C "netadmin@net-auto-srv.domain"
 copy id_rsa.pub from net-auto-srv:/home/netadmin/.ssh/ to syslog-srv:/home/netadmin/.ssh/authorized_keys
 ```
-You'll want to check you can ssh from net-auto-srv to syslog-srv as the netadmin user without a password before running the script.
+Check you can ssh from net-auto-srv to syslog-srv as the netadmin user without a password before running the script.
 ### pipenv
 We use python3 with [pipenv](https://docs.python-guide.org/dev/virtualenvs) to simplify dependencies. Our stock Centos build was missing pip. To get things up and running I did the following as the 'netadmin' user:
 * `sudo yum install python-pip`
