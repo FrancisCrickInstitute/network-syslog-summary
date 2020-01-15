@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 Script to summarise Cisco syslog into top N talkers by message and device, graph total message
 count over last retention period and post to Slack in json format.
