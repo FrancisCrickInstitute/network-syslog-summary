@@ -18,15 +18,13 @@ I've used relative paths in the script as I don't know where you'll clone the re
 Here is an example of how `slack.json` should look:
 ```
 {
-    "OAUTH_TOKEN_PROD": "your_token_here",
+    "OAUTH_TOKEN": "your_token_here",
     "WEBHOOK_PROD": "https://hooks.slack.com/services/MY/PROD/WEBHOOK/PATH",
     "WEBHOOK": 0,
     "CHANNEL": "channel_name_no_hash",
-    "POST": "No"
 }
 ```
 Head to https://api.slack.com to generate your OAUTH token. 
-POST toggles slack posting on/off.
 
 Here is an example of how `config.json` should look:
 ```
@@ -45,9 +43,8 @@ Here is an example of how `config.json` should look:
 The first three are specific to your syslog server.
 ```
 DAYS = number of days' data to retain and graph.
-TOPTALKERS = how many messages to display. This allows you to reduce the size 
-of the output to focus on the N most common syslog messages in your estate. 
-LOCALPOST = toggle local output, useful for debugging. 
+TOPTALKERS = how many messages to display. 
+LOCALPOST = toggle local output or post to slack, useful for debugging. 
 IGNORE_LIST = syslog message ID's you don't want to see
 CRITICAL_LIST = syslog message ID'd you want to highlight.
 ```
