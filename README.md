@@ -18,7 +18,7 @@ I've used relative paths in the script as I don't know where you'll clone the re
 Here is an example of how `slack.json` should look:
 ```
 {
-    "OAUTH_TOKEN_PROD": "your_token_here",
+    "OAUTH_TOKEN": "your_token_here",
     "WEBHOOK_PROD": "https://hooks.slack.com/services/MY/PROD/WEBHOOK/PATH",
     "WEBHOOK": 0,
     "CHANNEL": "channel_name_no_hash",
