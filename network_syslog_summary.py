@@ -44,7 +44,7 @@ with open("../network_config/slack.json") as slack_f:
 OATH = slack_settings["OAUTH_TOKEN"]
 WEBHOOK_URL = slack_settings["WEBHOOK"]
 USEWEBHOOK = slack_settings["USE_WEBHOOK"] # set 1 in ../network_config/slack.json if you can't use OATH (no graph though)
-SLACKCHANNEL = slack_settings["CHANNEL`"]
+SLACKCHANNEL = slack_settings["CHANNEL"]
 
 # Load locally significant config
 with open("config.json", "rt") as config_f:
@@ -54,10 +54,10 @@ SERVER = credentials["SERVER"]
 PATH = credentials["PATH"]
 RETENTION = int(credentials["DAYS"])
 TALKERCOUNT = credentials["TOPTALKERS"]
-DEBUG = credentials["LOCALPOST"] # set to 1 in config.json for local output & disable slack posting
 SKIP = credentials["IGNORE_LIST"].split(",") # any messages we may skip
 TIDY = credentials["TIDY_OUTPUT"]
 CRITICAL = credentials["CRITICAL_LIST"].split(",") # messages which need immediate action
+SLACK_DEBUG = credentials["LOCALPOST"] # set to True in config.json for local output & disble slack posting
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
