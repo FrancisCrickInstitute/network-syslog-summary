@@ -34,7 +34,7 @@ Here is an example of how `config.json` should look:
 	"PATH":":/var/log/syslog-ng/path/to/syslog/",
 	"DAYS": 30,
 	"TOPTALKERS": 10,
-	"LOCALPOST": 0,
+	"LOCALPOST": False,
 	"IGNORE_LIST" : "MSG-ID-FOO,MSG-ID-BAR",
 	"TIDY_OUTPUT": 1,
 	"CRITICAL_LIST":"MSG-ID-BAZ,MSG-ID-BAM"
