@@ -29,15 +29,15 @@ Head to https://api.slack.com to generate your OAUTH token.
 Here is an example of how `config.json` should look:
 ```
 {
-	"USERNAME":"syslog_server_user_id",
-	"SERVER":"syslog-srv.domain",
-	"PATH":":/var/log/syslog-ng/path/to/syslog/",
-	"DAYS": 30,
-	"TOPTALKERS": 10,
-	"LOCALPOST": False,
-	"IGNORE_LIST" : "MSG-ID-FOO,MSG-ID-BAR",
-	"TIDY_OUTPUT": 1,
-	"CRITICAL_LIST":"MSG-ID-BAZ,MSG-ID-BAM"
+    "USERNAME":"syslog_server_user_id",
+    "SERVER":"syslog-srv.domain",
+    "PATH":":/var/log/syslog-ng/path/to/syslog/",
+    "DAYS": 30,
+    "TOPTALKERS": 10,
+    "LOCALPOST": 0,
+    "IGNORE_LIST" : "MSG-ID-FOO,MSG-ID-BAR",
+    "TIDY_OUTPUT": 1,
+    "CRITICAL_LIST":"MSG-ID-BAZ,MSG-ID-BAM"
 }
 ```
 The first three are specific to your syslog server.
