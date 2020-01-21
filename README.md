@@ -45,7 +45,8 @@ Here is an example of how `config.json` should look:
 The first three are specific to your syslog server.
 ```
 DAYS = number of days' data to retain and graph.
-TOPTALKERS = how many messages to display. This allows you to reduce the size of the output to focus on the N most common syslog messages in your estate. 
+TOPTALKERS = how many messages to display. This allows you to reduce the size 
+of the output to focus on the N most common syslog messages in your estate. 
 LOCALPOST = toggle local output, useful for debugging. 
 IGNORE_LIST = syslog message ID's you don't want to see
 CRITICAL_LIST = syslog message ID'd you want to highlight.
