@@ -5,8 +5,49 @@ period and post to Slack. Optionally, you can filter out noisy messages from the
 The script is to aid daily operational checks in a busy NOC. 
 Suggest it is run daily via cron.  
 
-Rename server_example.json to server.json locally and add your syslog and slack details as well as lists of messages you wish to ignore or highlight. 
+We have a `network_config` repo which contains all our global config files. Secrets are not sync'd to github. This repo contains instructions as to where to find the information needed to populate the config files in our environment. In time we'll make this public and link from here.
 
+This script has two config files: `slack.json` - enables post to slack and `config.json` which contains variables only relevant to this script. The slack settings are global, script config settings are not. 
+
+As such, the script assumes its configuration files are located, relative to this repo, as follows:
+
+`/path/to/repos/network_syslog_summary/config.json`
+`/path/to/repos/network_config/slack.json`
+I've used relative paths in the script as I don't know where you'll clone the repo to.
+
+Here is an example of how `slack.json` should look:
+```
+{
+    "OAUTH_TOKEN": "your_token_here",
+    "WEBHOOK_PROD": "https://hooks.slack.com/services/MY/PROD/WEBHOOK/PATH",
+    "WEBHOOK": 0,
+    "CHANNEL": "channel_name_no_hash",
+}
+```
+Head to https://api.slack.com to generate your OAUTH token. 
+
+Here is an example of how `config.json` should look:
+```
+{
+    "USERNAME":"syslog_server_user_id",
+    "SERVER":"syslog-srv.domain",
+    "PATH":":/var/log/syslog-ng/path/to/syslog/",
+    "DAYS": 30,
+    "TOPTALKERS": 10,
+    "LOCALPOST": 0,
+    "IGNORE_LIST" : "MSG-ID-FOO,MSG-ID-BAR",
+    "TIDY_OUTPUT": 1,
+    "CRITICAL_LIST":"MSG-ID-BAZ,MSG-ID-BAM"
+}
+```
+The first three are specific to your syslog server.
+```
+DAYS = number of days' data to retain and graph.
+TOPTALKERS = how many messages to display. 
+LOCALPOST = toggle local output or post to slack, useful for debugging. 
+IGNORE_LIST = syslog message ID's you don't want to see
+CRITICAL_LIST = syslog message ID'd you want to highlight.
+```
 Note:
 1. We aggregate all our switch logs into a single ```switch.log``` file. You will need to do this.
 2. network-syslog-summary takes the message-id and the name or IP of the device from each line and counts the total 

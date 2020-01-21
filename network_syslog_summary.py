@@ -37,21 +37,27 @@ line_count = 0
 now = datetime.datetime.now()
 # YYYY-MM-DD
 today_ymd = "switch.log-"+now.strftime("%Y")+"-"+now.strftime("%m")+"-"+now.strftime("%d")+".gz"
-with open("server.json", "rt") as server_f:
-    credentials = json.load(server_f)
+# Load global config
+with open("../network_config/slack.json") as slack_f:
+    slack_settings = json.load(slack_f)
+
+OATH = slack_settings["OAUTH_TOKEN"]
+WEBHOOK_URL = slack_settings["WEBHOOK"]
+USEWEBHOOK = slack_settings["USE_WEBHOOK"] # set 1 in ../network_config/slack.json if you can't use OATH (no graph though)
+SLACKCHANNEL = slack_settings["CHANNEL"]
+
+# Load locally significant config
+with open("config.json", "rt") as config_f:
+    credentials = json.load(config_f)
 USERNAME = credentials["USERNAME"]
 SERVER = credentials["SERVER"]
 PATH = credentials["PATH"]
 RETENTION = int(credentials["DAYS"])
 TALKERCOUNT = credentials["TOPTALKERS"]
-USEWEBHOOK = credentials["WEBHOOK"] # set 1 in server.json if you can't use OATH (no graph though)
-WEBHOOK_URL = credentials["WEBHOOK_PROD"]
-DEBUG = credentials["LOCALPOST"] # set to 1 in server.json for local output & disable slack posting
-OATH = credentials["OAUTH_TOKEN_BOT"]
-SLACKCHANNEL = credentials["CHANNEL"]
 SKIP = credentials["IGNORE_LIST"].split(",") # any messages we may skip
 TIDY = credentials["TIDY_OUTPUT"]
 CRITICAL = credentials["CRITICAL_LIST"].split(",") # messages which need immediate action
+DEBUG = credentials["LOCALPOST"] # set to True in config.json for local output & disble slack posting
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
@@ -233,7 +239,7 @@ def post_to_slack_webhook(message):
 # If you can use OATH, you'll get the graph too. Use one or the other
 client = slack.WebClient(token=OATH)
 
-if DEBUG == 0:
+if not DEBUG:
     if USEWEBHOOK == 1:
         post_to_slack_webhook(message_data)
         post_to_slack_webhook(data)

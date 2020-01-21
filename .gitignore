@@ -1,5 +1,5 @@
 # secret info
-server.json
+config.json
 # locally significant only
 history.json
 plot.png
