@@ -57,7 +57,7 @@ TALKERCOUNT = credentials["TOPTALKERS"]
 SKIP = credentials["IGNORE_LIST"].split(",") # any messages we may skip
 TIDY = credentials["TIDY_OUTPUT"]
 CRITICAL = credentials["CRITICAL_LIST"].split(",") # messages which need immediate action
-SLACK_DEBUG = credentials["LOCALPOST"] # set to True in config.json for local output & disble slack posting
+DEBUG = credentials["LOCALPOST"] # set to True in config.json for local output & disble slack posting
 ARG = "scp " + USERNAME + "@" + SERVER + PATH + today_ymd+" ./"
 today_d = date.today()
 today_s = today_d.strftime("%Y-%m-%d")
@@ -239,7 +239,7 @@ def post_to_slack_webhook(message):
 # If you can use OATH, you'll get the graph too. Use one or the other
 client = slack.WebClient(token=OATH)
 
-if DEBUG == 0:
+if not DEBUG:
     if USEWEBHOOK == 1:
         post_to_slack_webhook(message_data)
         post_to_slack_webhook(data)
