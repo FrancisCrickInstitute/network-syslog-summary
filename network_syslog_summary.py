@@ -169,8 +169,9 @@ plt.savefig("plot.png")
 
 msgcount = TALKERCOUNT
 # Produce the top TALKERCOUNT messages by count
-messagestring = "The top "+str(TALKERCOUNT)+" messages across the whole network and with \n :warning: " \
-                                            "*"+str(CRITICAL)+"* :warning: \n highlighted if found by count are:"
+messagestring = "-"*60 + "\nPlease look out for any of the following :warning: *highlighted*\
+:warning: message-id's as they will need further investigation: \n *"+str(CRITICAL)+"*\
+\n"+"-"*60+"\nThe top "+str(TALKERCOUNT)+" messages across the whole network follow. \n"
 message_data = []
 message_data.append({"type": "section", "text": {"type": "mrkdwn", "text": messagestring}})
 for i in sorted_gmc:
