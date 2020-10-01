@@ -20,7 +20,7 @@ Here is an example of how `slack.json` should look:
     "OAUTH_TOKEN": "your_token_here",
     "WEBHOOK_PROD": "https://hooks.slack.com/services/MY/PROD/WEBHOOK/PATH",
     "WEBHOOK": 0,
-    "CHANNEL": "channel_name_no_hash",
+    "CHANNEL": "channel_name_no_hash"
 }
 ```
 Head to https://api.slack.com to generate your OAUTH token. 
